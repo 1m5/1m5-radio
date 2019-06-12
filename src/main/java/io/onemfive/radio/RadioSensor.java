@@ -80,7 +80,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         if(request.content.length() > RadioDatagramBuilder.DATAGRAM_MAX_SIZE) {
             // Just warn for now
             // TODO: Split into multiple serialized datagrams
-            LOG.warning("Content longer than 1mb. May have issues.");
+            LOG.warning("Content longer than "+RadioDatagramBuilder.DATAGRAM_MAX_SIZE+". May have issues.");
         }
 
         Destination toDestination = session.lookupDestination(toPeer.getAddress());
