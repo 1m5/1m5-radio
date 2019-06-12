@@ -77,7 +77,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             request.errorCode = SensorRequest.NO_CONTENT;
             return false;
         }
-        if(request.content.length() > 1000000) {
+        if(request.content.length() > RadioDatagramBuilder.DATAGRAM_MAX_SIZE) {
             // Just warn for now
             // TODO: Split into multiple serialized datagrams
             LOG.warning("Content longer than 1mb. May have issues.");
