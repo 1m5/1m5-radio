@@ -9,7 +9,7 @@ public class RadioDatagramBuilder {
         this.session = session;
     }
 
-    public byte[] makeSDRDatagram(byte[] payload) {
-        return payload;
+    public RadioDatagram makeRadioDatagram(byte[] payload) {
+        return null;
     }
 }

@@ -2,7 +2,6 @@ package io.onemfive.radio;
 
 import io.onemfive.core.ServiceRequest;
 import io.onemfive.core.notification.NotificationService;
-import io.onemfive.core.util.data.Base64;
 import io.onemfive.data.DID;
 import io.onemfive.data.Envelope;
 import io.onemfive.data.EventMessage;
@@ -90,9 +89,9 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             return false;
         }
         RadioDatagramBuilder builder = new RadioDatagramBuilder(session);
-        byte[] payload = builder.makeSDRDatagram(request.content.getBytes());
+        RadioDatagram datagram = builder.makeRadioDatagram(request.content.getBytes());
         Properties options = new Properties();
-        if(session.sendMessage(toDestination, payload, options)) {
+        if(session.sendMessage(toDestination, datagram, options)) {
             LOG.info("SDR Message sent.");
             return true;
         } else {

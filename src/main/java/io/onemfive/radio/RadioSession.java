@@ -22,7 +22,7 @@ public class RadioSession {
         return dest;
     }
 
-    boolean sendMessage(Destination toDestination, byte[] payload, Properties options) {
+    boolean sendMessage(Destination toDestination, RadioDatagram datagram, Properties options) {
         LOG.warning("RadioSession.sendMessage() not implemented.");
         return false;
     }
