@@ -31,17 +31,17 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
 
     @Override
     public String[] getOperationEndsWith() {
-        return new String[]{".sdr"};
+        return new String[]{".rad"};
     }
 
     @Override
     public String[] getURLBeginsWith() {
-        return new String[]{"sdr"};
+        return new String[]{"rad"};
     }
 
     @Override
     public String[] getURLEndsWith() {
-        return new String[]{".sdr"};
+        return new String[]{".rad"};
     }
 
     /**
@@ -61,7 +61,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         }
         NetworkPeer toPeer = request.to.getPeer(NetworkPeer.Network.SDR.name());
         if(toPeer == null) {
-            LOG.warning("No Peer for SDR found in toDID while sending to Radio.");
+            LOG.warning("No Peer for Radio found in toDID while sending to Radio.");
             request.errorCode = SensorRequest.TO_PEER_REQUIRED;
             return false;
         }
@@ -92,10 +92,10 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         RadioDatagram datagram = builder.makeRadioDatagram(request.content.getBytes());
         Properties options = new Properties();
         if(session.sendMessage(toDestination, datagram, options)) {
-            LOG.info("SDR Message sent.");
+            LOG.info("Radio Message sent.");
             return true;
         } else {
-            LOG.warning("SDR Message sending failed.");
+            LOG.warning("Radio Message sending failed.");
             request.errorCode = SensorRequest.SENDING_FAILED;
             return false;
         }
@@ -135,13 +135,13 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         LOG.info("Message received by Radio Sensor...");
         byte[] msg = session.receiveMessage(msgId);
 
-        LOG.info("Loading SDR Datagram...");
+        LOG.info("Loading Radio Datagram...");
         RadioDatagramExtractor d = new RadioDatagramExtractor();
         d.extractRadioDatagram(msg);
-        LOG.info("SDR Datagram loaded.");
+        LOG.info("Radio Datagram loaded.");
         byte[] payload = d.getPayload();
         String strPayload = new String(payload);
-        LOG.info("Getting sender as SDR Destination...");
+        LOG.info("Getting sender as Radio Destination...");
         Destination sender = d.getSender();
         String address = sender.toBase64();
         String fingerprint = null;
@@ -152,7 +152,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         } catch (IOException e) {
             LOG.warning(e.getLocalizedMessage());
         }
-        LOG.info("Received SDR Message:\n    From: " + address +"\n    Content: " + strPayload);
+        LOG.info("Received Radio Message:\n\tFrom: " + address +"\n\tContent: " + strPayload);
 
         Envelope e = Envelope.eventFactory(EventMessage.Type.TEXT);
         NetworkPeer from = new NetworkPeer(NetworkPeer.Network.SDR.name());
@@ -196,7 +196,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     }
 
     public void checkRouterStats() {
-        LOG.info("RadioSensor (SDR) stats:" +
+        LOG.info("RadioSensor stats:" +
                 "\n\t...");
     }
 
@@ -204,18 +204,18 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         String statusText;
         switch (getStatus()) {
             case NETWORK_CONNECTING:
-                statusText = "Testing SDR Network...";
+                statusText = "Testing Radio Network...";
                 break;
             case NETWORK_CONNECTED:
-                statusText = "Connected to SDR Network.";
+                statusText = "Connected to Radio Network.";
                 restartAttempts = 0; // Reset restart attempts
                 break;
             case NETWORK_STOPPED:
-                statusText = "Disconnected from SDR Network.";
+                statusText = "Disconnected from Radio Network.";
                 restart();
                 break;
             default: {
-                statusText = "Unhandled SDR Network Status: "+getStatus().name();
+                statusText = "Unhandled Radio Network Status: "+getStatus().name();
             }
         }
         LOG.info(statusText);
@@ -248,8 +248,8 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         DID localDID = new DID();
         localDID.addPeer(np);
 
-        // Publish local SDR address
-        LOG.info("Publishing SDR Network Peer's DID...");
+        // Publish local Radio address
+        LOG.info("Publishing Radio Network Peer's DID...");
         Envelope e = Envelope.eventFactory(EventMessage.Type.STATUS_DID);
         EventMessage m = (EventMessage) e.getMessage();
         m.setName(fingerprint);
