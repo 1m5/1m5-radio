@@ -24,6 +24,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
 
     private RadioSession session;
     private TaskRunner taskRunner;
+    private RadioPeer localNode;
 
     public RadioSensor(SensorManager sensorManager, Envelope.Sensitivity sensitivity, Integer priority) {
         super(sensorManager, sensitivity, priority);
@@ -258,6 +259,10 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         sensorManager.sendToBus(e);
         taskRunner = new TaskRunner(this, sessionProperties);
         taskRunner.start();
+    }
+
+    public RadioPeer getLocalNode() {
+        return localNode;
     }
 
     @Override
