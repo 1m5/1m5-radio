@@ -230,7 +230,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         updateStatus(SensorStatus.INITIALIZING);
 
         Properties sessionProperties = new Properties();
-
+        session = new RadioSession();
         session.connect();
 
         Destination localDestination = session.getLocalDestination();
