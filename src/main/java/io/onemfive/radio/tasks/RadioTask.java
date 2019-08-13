@@ -7,7 +7,7 @@ import java.util.Properties;
 /**
  * A task for the Radio Sensor.
  */
-abstract class RadioTask {
+public abstract class RadioTask {
     protected RadioSensor sensor;
     protected TaskRunner taskRunner;
     protected Properties properties;
@@ -32,17 +32,17 @@ abstract class RadioTask {
         this.periodicity = periodicity;
     }
 
-    abstract boolean runTask();
+    public abstract boolean runTask();
 
-    boolean isLongRunning() {return longRunning;}
+    public boolean isLongRunning() {return longRunning;}
 
-    void setLastCompletionTime(long lastCompletionTime) {
+    public void setLastCompletionTime(long lastCompletionTime) {
         this.lastCompletionTime = lastCompletionTime;
     }
 
-    long getLastCompletionTime() { return lastCompletionTime;}
+    public long getLastCompletionTime() { return lastCompletionTime;}
 
-    long getPeriodicity() {
+    public long getPeriodicity() {
         return periodicity;
     }
 }
