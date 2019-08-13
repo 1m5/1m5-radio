@@ -1,6 +1,6 @@
 package io.onemfive.radio.jamming;
 
-public class BaseJammer implements Jammer {
+public abstract class BaseJammer implements Jammer {
 
     protected JammerStatus status;
 
