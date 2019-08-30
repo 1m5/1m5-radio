@@ -39,25 +39,25 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
 			<id>integrationnet</id>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
 			<id>testnet</id>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
 			<id>mainnet</id>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 	</profiles>

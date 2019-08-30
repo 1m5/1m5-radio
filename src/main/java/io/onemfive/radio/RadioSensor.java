@@ -9,7 +9,7 @@ import io.onemfive.data.EventMessage;
 import io.onemfive.data.NetworkPeer;
 import io.onemfive.data.util.*;
 import io.onemfive.radio.tasks.TaskRunner;
-import io.onemfive.radio.vendor.gnu.GNURadio;
+import io.onemfive.radio.vendor.gnuradio.GNURadio;
 import io.onemfive.sensors.*;
 
 import java.io.*;
