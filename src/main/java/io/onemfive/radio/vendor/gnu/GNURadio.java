@@ -71,9 +71,10 @@ public class GNURadio implements Radio {
                 rtl.close();
             } catch (IOException e) {
                 LOG.warning(e.getLocalizedMessage());
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     @Override
