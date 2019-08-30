@@ -272,31 +272,42 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             // Default to GNURadio
             radio = new GNURadio();
         }
-        return loadLocalNode();
+
+        if(!loadLocalNode()) {
+            return false;
+        }
+
+        if(radio.start(properties)) {
+            updateStatus(SensorStatus.NETWORK_CONNECTING);
+            return true;
+        } else {
+            updateStatus(SensorStatus.NETWORK_ERROR);
+            return false;
+        }
     }
 
     @Override
     public boolean pause() {
-        return false;
+        return radio.pause();
     }
 
     @Override
     public boolean unpause() {
-        return false;
+        return radio.unpause();
     }
 
     @Override
     public boolean restart() {
-        return false;
+        return radio.restart();
     }
 
     @Override
     public boolean shutdown() {
-        return false;
+        return radio.shutdown();
     }
 
     @Override
     public boolean gracefulShutdown() {
-        return false;
+        return radio.gracefulShutdown();
     }
 }
