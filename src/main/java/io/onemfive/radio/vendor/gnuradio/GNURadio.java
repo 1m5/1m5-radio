@@ -18,6 +18,7 @@ public class GNURadio implements Radio {
     private Logger LOG = Logger.getLogger(GNURadio.class.getName());
 
     public int sendMessage(RadioDatagram datagram, Properties options) {
+        LOG.warning("GNURadio sendMessage not yet implemented.");
         return 0;
     }
 

@@ -20,7 +20,7 @@ public class JRadio implements Radio {
 
     @Override
     public int sendMessage(RadioDatagram datagram, Properties options) {
-
+        LOG.warning("JRadio sendMessage not yet implemented.");
         return 0;
     }
 
