@@ -9,25 +9,19 @@ public class RadioSession {
 
     private static final Logger LOG = Logger.getLogger(RadioSession.class.getName());
 
-    private Destination localDestination;
     private List<RadioSessionListener> listeners = new ArrayList<>();
+    private Radio radio;
 
-    Destination getLocalDestination() {
-        return localDestination;
+    public RadioSession(Radio radio) {
+        this.radio = radio;
     }
 
-    Destination lookupDestination(String address) {
-        Destination dest = null;
-
-        return dest;
-    }
-
-    boolean sendMessage(Destination toDestination, RadioDatagram datagram, Properties options) {
-        LOG.warning("RadioSession.sendMessage() not implemented.");
+    boolean sendMessage(RadioDatagram datagram, Properties options) {
+        radio.sendMessage(datagram, options);
         return false;
     }
 
-    byte[] receiveMessage(int msgId) {
+    public RadioDatagram receiveMessage(int msgId) {
         return null;
     }
 
