@@ -1,30 +1,38 @@
 package io.onemfive.radio;
 
+import io.onemfive.core.Config;
 import io.onemfive.core.ServiceRequest;
+import io.onemfive.core.ServiceStatus;
 import io.onemfive.core.notification.NotificationService;
 import io.onemfive.data.DID;
 import io.onemfive.data.Envelope;
 import io.onemfive.data.EventMessage;
 import io.onemfive.data.NetworkPeer;
-import io.onemfive.data.util.DLC;
-import io.onemfive.data.util.DataFormatException;
+import io.onemfive.data.util.*;
 import io.onemfive.radio.tasks.TaskRunner;
-import io.onemfive.sensors.BaseSensor;
-import io.onemfive.sensors.SensorManager;
-import io.onemfive.sensors.SensorRequest;
-import io.onemfive.sensors.SensorStatus;
+import io.onemfive.radio.vendor.GNURadio;
+import io.onemfive.sensors.*;
 
 import java.io.*;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+/**
+ * Manages communications across the full radio electromagnetic spectrum
+ * using Software Defined Radio (SDR). Defaults to GNU Radio.
+ */
 public class RadioSensor extends BaseSensor implements RadioSessionListener {
 
     private static final Logger LOG = Logger.getLogger(RadioSensor.class.getName());
+    private static String LOCAL_NODE_FILE_NAME = "sdr";
 
+    private Properties properties;
+    private Radio radio;
     private RadioSession session;
     private TaskRunner taskRunner;
     private RadioPeer localNode;
+    private File localNodeFile;
 
     public RadioSensor(SensorManager sensorManager, Envelope.Sensitivity sensitivity, Integer priority) {
         super(sensorManager, sensitivity, priority);
@@ -32,21 +40,21 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
 
     @Override
     public String[] getOperationEndsWith() {
-        return new String[]{".rad"};
+        return new String[]{".sdr"};
     }
 
     @Override
     public String[] getURLBeginsWith() {
-        return new String[]{"rad"};
+        return new String[]{"sdr"};
     }
 
     @Override
     public String[] getURLEndsWith() {
-        return new String[]{".rad"};
+        return new String[]{".sdr"};
     }
 
     /**
-     * Sends UTF-8 content to a Destination using Software Defined Radio (SDR).
+     * Sends UTF-8 content to a Radio Peer using Software Defined Radio (SDR).
      * @param envelope Envelope containing SensorRequest as data.
      *                 To DID must contain base64 encoded Radio destination key.
      * @return boolean was successful
@@ -71,6 +79,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             request.errorCode = SensorRequest.TO_PEER_WRONG_NETWORK;
             return false;
         }
+        NetworkPeer fromPeer = request.from.getPeer(NetworkPeer.Network.SDR.name());
         LOG.info("Content to send: "+request.content);
         if(request.content == null) {
             LOG.warning("No content found in Envelope while sending to Radio.");
@@ -83,16 +92,10 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             LOG.warning("Content longer than "+RadioDatagramBuilder.DATAGRAM_MAX_SIZE+". May have issues.");
         }
 
-        Destination toDestination = session.lookupDestination(toPeer.getAddress());
-        if(toDestination == null) {
-            LOG.warning("Radio Peer To Destination not found.");
-            request.errorCode = SensorRequest.TO_PEER_NOT_FOUND;
-            return false;
-        }
         RadioDatagramBuilder builder = new RadioDatagramBuilder(session);
         RadioDatagram datagram = builder.makeRadioDatagram(request.content.getBytes());
         Properties options = new Properties();
-        if(session.sendMessage(toDestination, datagram, options)) {
+        if(session.sendMessage(datagram, options)) {
             LOG.info("Radio Message sent.");
             return true;
         } else {
@@ -114,12 +117,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     }
 
     /**
-     * Will be called only if you register via
-     * setSessionListener() or addSessionListener().
-     * And if you are doing that, just use I2PSessionListener.
-     *
-     * If you register via addSessionListener(),
-     * this will be called only for the proto(s) and toport(s) you register for.
+     * Will be called only if you register via addSessionListener().
      *
      * After this is called, the client should call receiveMessage(msgId).
      * There is currently no method for the client to reject the message.
@@ -133,38 +131,15 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      */
     @Override
     public void messageAvailable(RadioSession session, int msgId, long size) {
-        LOG.info("Message received by Radio Sensor...");
-        byte[] msg = session.receiveMessage(msgId);
-
-        LOG.info("Loading Radio Datagram...");
-        RadioDatagramExtractor d = new RadioDatagramExtractor();
-        d.extractRadioDatagram(msg);
-        LOG.info("Radio Datagram loaded.");
-        byte[] payload = d.getPayload();
-        String strPayload = new String(payload);
-        LOG.info("Getting sender as Radio Destination...");
-        Destination sender = d.getSender();
-        String address = sender.toBase64();
-        String fingerprint = null;
-        try {
-            fingerprint = sender.getHash().toBase64();
-        } catch (DataFormatException e) {
-            LOG.warning(e.getLocalizedMessage());
-        } catch (IOException e) {
-            LOG.warning(e.getLocalizedMessage());
-        }
-        LOG.info("Received Radio Message:\n\tFrom: " + address +"\n\tContent: " + strPayload);
-
+        RadioDatagram d = session.receiveMessage(msgId);
+        LOG.info("Received Radio Message:\n\tFrom: " + d.from.getSDRAddress());
         Envelope e = Envelope.eventFactory(EventMessage.Type.TEXT);
-        NetworkPeer from = new NetworkPeer(NetworkPeer.Network.SDR.name());
-        from.setAddress(address);
-        from.setFingerprint(fingerprint);
         DID did = new DID();
-        did.addPeer(from);
+        did.addPeer(d.from);
         e.setDID(did);
         EventMessage m = (EventMessage) e.getMessage();
-        m.setName(fingerprint);
-        m.setMessage(strPayload);
+        m.setName(d.from.getSDRFingerprint());
+        m.setMessage(d);
         DLC.addRoute(NotificationService.class, NotificationService.OPERATION_PUBLISH, e);
         LOG.info("Sending Event Message to Notification Service...");
         sensorManager.sendToBus(e);
@@ -231,32 +206,10 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         updateStatus(SensorStatus.INITIALIZING);
 
         Properties sessionProperties = new Properties();
-        session = new RadioSession();
+        session = new RadioSession(radio);
         session.connect();
-
-        Destination localDestination = session.getLocalDestination();
-        String address = localDestination.toBase64();
-        String fingerprint = localDestination.getHash().toBase64();
-        LOG.info("RadioSensor Local destination key in base64: " + address);
-        LOG.info("RadioSensor Local destination fingerprint (hash) in base64: " + fingerprint);
-
         session.addSessionListener(this);
 
-        NetworkPeer np = new NetworkPeer(NetworkPeer.Network.SDR.name());
-        np.getDid().getPublicKey().setFingerprint(fingerprint);
-        np.getDid().getPublicKey().setAddress(address);
-
-        DID localDID = new DID();
-        localDID.addPeer(np);
-
-        // Publish local Radio address
-        LOG.info("Publishing Radio Network Peer's DID...");
-        Envelope e = Envelope.eventFactory(EventMessage.Type.STATUS_DID);
-        EventMessage m = (EventMessage) e.getMessage();
-        m.setName(fingerprint);
-        m.setMessage(localDID);
-        DLC.addRoute(NotificationService.class, NotificationService.OPERATION_PUBLISH, e);
-        sensorManager.sendToBus(e);
         taskRunner = new TaskRunner(this, sessionProperties);
         taskRunner.start();
     }
@@ -265,9 +218,61 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         return localNode;
     }
 
+    private boolean loadLocalNode() {
+        // read the local node from its file if it exists
+        if(localNodeFile==null) {
+            localNodeFile = new File(getDirectory(), LOCAL_NODE_FILE_NAME);
+        }
+        if(!localNodeFile.exists()) {
+            try {
+                if(!localNodeFile.createNewFile()) {
+                    return false;
+                }
+            } catch (IOException e) {
+                LOG.warning(e.getLocalizedMessage());
+                return false;
+            }
+        }
+        if(localNodeFile.length() > 0) {
+            String localNodeJSON = FileUtil.readTextFile(localNodeFile.getAbsolutePath(), 1000, true);
+            Map<String, Object> m = (Map<String, Object>) JSONParser.parse(localNodeJSON);
+            if(m!=null && m.size()>0) {
+                localNode = new RadioPeer();
+                localNode.fromMap(m);
+                LOG.info("RadioSensor Local Radio peer: " + localNode.toString());
+            }
+        }
+        if(localNode==null) {
+            LOG.info("Requesting new RadioSensor local Radio Peer...");
+
+        }
+        return true;
+    }
+
     @Override
-    public boolean start(java.util.Properties properties) {
-        return false;
+    public boolean start(Properties p) {
+        LOG.info("Starting Radio Sensor...");
+        updateStatus(SensorStatus.STARTING);
+        try {
+            this.properties = Config.loadFromClasspath("radio-sensor.config", p, false);
+        } catch (Exception e) {
+            LOG.warning(e.getLocalizedMessage());
+        }
+
+        String radioDef = properties.getProperty(Radio.class.getName());
+        if(radioDef!=null) {
+            try {
+                radio = (Radio)Class.forName(radioDef).newInstance();
+            } catch (Exception e) {
+                LOG.warning("Unable to instantiate Radio of type: "+radioDef+"\n\tException: "+e.getLocalizedMessage());
+                return false;
+            }
+        }
+        if(radio==null) {
+            // Default to GNURadio
+            radio = new GNURadio();
+        }
+        return loadLocalNode();
     }
 
     @Override
