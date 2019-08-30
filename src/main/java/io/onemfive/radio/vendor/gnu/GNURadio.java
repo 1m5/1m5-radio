@@ -1,4 +1,4 @@
-package io.onemfive.radio.vendor;
+package io.onemfive.radio.vendor.gnu;
 
 import io.onemfive.radio.Radio;
 import io.onemfive.radio.RadioDatagram;

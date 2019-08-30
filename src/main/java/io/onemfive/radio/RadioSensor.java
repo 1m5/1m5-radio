@@ -2,7 +2,6 @@ package io.onemfive.radio;
 
 import io.onemfive.core.Config;
 import io.onemfive.core.ServiceRequest;
-import io.onemfive.core.ServiceStatus;
 import io.onemfive.core.notification.NotificationService;
 import io.onemfive.data.DID;
 import io.onemfive.data.Envelope;
@@ -10,7 +9,7 @@ import io.onemfive.data.EventMessage;
 import io.onemfive.data.NetworkPeer;
 import io.onemfive.data.util.*;
 import io.onemfive.radio.tasks.TaskRunner;
-import io.onemfive.radio.vendor.GNURadio;
+import io.onemfive.radio.vendor.gnu.GNURadio;
 import io.onemfive.sensors.*;
 
 import java.io.*;
