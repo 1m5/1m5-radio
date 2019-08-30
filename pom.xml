@@ -39,25 +39,25 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
 			<id>integrationnet</id>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
 			<id>testnet</id>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
 			<id>mainnet</id>
 			<properties>
-				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnu.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 	</profiles>
@@ -74,6 +74,11 @@
 			<groupId>io.onemfive</groupId>
 			<artifactId>sensors</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ru.r2cloud</groupId>
+			<artifactId>jradio</artifactId>
+			<version>1.16-SNAPSHOT</version>
 		</dependency>
 		<!-- Test -->
 		<dependency>
