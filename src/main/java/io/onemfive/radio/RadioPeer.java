@@ -18,6 +18,10 @@ public class RadioPeer extends NetworkPeer implements Addressable, JSONSerializa
         super(NetworkPeer.Network.SDR.name(), username, passphrase);
     }
 
+    public RadioPeer(NetworkPeer peer) {
+        fromMap(peer.toMap());
+    }
+
     @Override
     public Object clone() {
         RadioPeer clone = new RadioPeer();
