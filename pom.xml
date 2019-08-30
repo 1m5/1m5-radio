@@ -32,6 +32,36 @@
 		<url>git@github.com/1m5/1m5-radio</url>
 	</scm>
 
+	<profiles>
+		<profile>
+			<id>devnet</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+			</properties>
+		</profile>
+		<profile>
+			<id>integrationnet</id>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+			</properties>
+		</profile>
+		<profile>
+			<id>testnet</id>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+			</properties>
+		</profile>
+		<profile>
+			<id>mainnet</id>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.GNURadio</io.onemfive.radio.Radio>
+			</properties>
+		</profile>
+	</profiles>
+
 	<repositories>
 		<repository>
 			<id>jitpack.io</id>
