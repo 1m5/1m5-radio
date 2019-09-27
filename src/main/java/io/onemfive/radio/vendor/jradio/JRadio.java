@@ -4,6 +4,7 @@ import io.onemfive.core.Config;
 import io.onemfive.radio.Radio;
 import io.onemfive.radio.RadioDatagram;
 import io.onemfive.radio.RadioSession;
+import ru.r2cloud.jradio.Context;
 import ru.r2cloud.jradio.RtlSdrSettings;
 import ru.r2cloud.jradio.source.RtlTcp;
 
@@ -18,13 +19,12 @@ public class JRadio implements Radio {
 
     private Logger LOG = Logger.getLogger(JRadio.class.getName());
 
-    private RtlSdrSettings settings;
     private Properties config;
     private String host = "127.0.0.1";
     private int port = 5000;
-    private long frequency = 60*1000L;
-    private long sampleRate = 120*1000L;
-    private RtlTcp rtl;
+    private RtlSdrSettings rtlSdrSettings;
+    private Context radioContext;
+    private RtlTcp tcp;
 
     @Override
     public int sendMessage(RadioDatagram datagram, Properties options) {
@@ -53,18 +53,18 @@ public class JRadio implements Radio {
         if(portStr!=null) {
             port = Integer.parseInt(portStr);
         }
+        rtlSdrSettings = new RtlSdrSettings();
         String frequencyStr = properties.getProperty("io.onemfive.radio.frequency");
         if(frequencyStr!=null) {
-            frequency = Long.parseLong(frequencyStr);
+            rtlSdrSettings.setFrequency(Long.parseLong(frequencyStr));
         }
         String sampleRateStr = properties.getProperty("io.onemfive.radio.sampleRate");
         if(sampleRateStr!=null) {
-            sampleRate = Long.parseLong(sampleRateStr);
+            rtlSdrSettings.setSampleRate(Long.parseLong(sampleRateStr));
         }
-        settings.setFrequency(frequency);
-        settings.setSampleRate(sampleRate);
         try {
-            rtl = new RtlTcp(host, port, settings);
+            tcp = new RtlTcp(host, port, rtlSdrSettings);
+            radioContext = tcp.getContext();
 
         } catch (IOException e) {
             LOG.warning(e.getLocalizedMessage());
@@ -90,9 +90,9 @@ public class JRadio implements Radio {
 
     @Override
     public boolean shutdown() {
-        if(rtl!=null) {
+        if(tcp !=null) {
             try {
-                rtl.close();
+                tcp.close();
             } catch (IOException e) {
                 LOG.warning(e.getLocalizedMessage());
                 return false;
