@@ -10,4 +10,5 @@ import java.util.Properties;
 public interface Radio extends LifeCycle {
 
     int sendMessage(RadioDatagram datagram, Properties options);
+    RadioSession establishSession();
 }

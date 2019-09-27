@@ -2,6 +2,7 @@ package io.onemfive.radio.vendor.gnuradio;
 
 import io.onemfive.radio.Radio;
 import io.onemfive.radio.RadioDatagram;
+import io.onemfive.radio.RadioSession;
 
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -23,6 +24,11 @@ public class GNURadio implements Radio {
     }
 
     public native int sendMessage(byte[] message);
+
+    @Override
+    public RadioSession establishSession() {
+        return null;
+    }
 
     @Override
     public boolean start(Properties properties) {
