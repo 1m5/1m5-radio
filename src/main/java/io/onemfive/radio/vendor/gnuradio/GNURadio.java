@@ -3,6 +3,7 @@ package io.onemfive.radio.vendor.gnuradio;
 import io.onemfive.radio.Radio;
 import io.onemfive.radio.RadioDatagram;
 import io.onemfive.radio.RadioSession;
+import io.onemfive.radio.vendor.VendorRadio;
 
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author objectorange
  */
-public class GNURadio implements Radio {
+public class GNURadio extends VendorRadio {
 
     private Logger LOG = Logger.getLogger(GNURadio.class.getName());
 
@@ -25,40 +26,4 @@ public class GNURadio implements Radio {
 
     public native int sendMessage(byte[] message);
 
-    @Override
-    public RadioSession establishSession() {
-        return null;
-    }
-
-    @Override
-    public boolean start(Properties properties) {
-
-        return true;
-    }
-
-    @Override
-    public boolean pause() {
-        return false;
-    }
-
-    @Override
-    public boolean unpause() {
-        return false;
-    }
-
-    @Override
-    public boolean restart() {
-        return false;
-    }
-
-    @Override
-    public boolean shutdown() {
-
-        return true;
-    }
-
-    @Override
-    public boolean gracefulShutdown() {
-        return shutdown();
-    }
 }

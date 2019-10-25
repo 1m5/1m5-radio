@@ -4,6 +4,7 @@ import io.onemfive.core.Config;
 import io.onemfive.radio.Radio;
 import io.onemfive.radio.RadioDatagram;
 import io.onemfive.radio.RadioSession;
+import io.onemfive.radio.vendor.VendorRadio;
 import ru.r2cloud.jradio.Context;
 import ru.r2cloud.jradio.RtlSdrSettings;
 import ru.r2cloud.jradio.source.RtlTcp;
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
 /**
  * Integration with JRadio implemented at: https://github.com/dernasherbrezon/jradio
  */
-public class JRadio implements Radio {
+public class JRadio extends VendorRadio {
 
     private Logger LOG = Logger.getLogger(JRadio.class.getName());
 
@@ -30,11 +31,6 @@ public class JRadio implements Radio {
     public int sendMessage(RadioDatagram datagram, Properties options) {
         LOG.warning("JRadio sendMessage not yet implemented.");
         return 0;
-    }
-
-    @Override
-    public RadioSession establishSession() {
-        return null;
     }
 
     @Override
@@ -74,21 +70,6 @@ public class JRadio implements Radio {
     }
 
     @Override
-    public boolean pause() {
-        return false;
-    }
-
-    @Override
-    public boolean unpause() {
-        return false;
-    }
-
-    @Override
-    public boolean restart() {
-        return false;
-    }
-
-    @Override
     public boolean shutdown() {
         if(tcp !=null) {
             try {
@@ -103,6 +84,6 @@ public class JRadio implements Radio {
 
     @Override
     public boolean gracefulShutdown() {
-        return false;
+        return shutdown();
     }
 }
