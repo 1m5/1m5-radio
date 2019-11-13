@@ -5,7 +5,7 @@
 
 	<groupId>io.onemfive</groupId>
 	<artifactId>radio</artifactId>
-	<version>0.6.2-SNAPSHOT</version>
+	<version>0.1.0-SNAPSHOT</version>
 
 	<packaging>jar</packaging>
 
@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>io.onemfive</groupId>
 			<artifactId>sensors</artifactId>
-			<version>${project.version}</version>
+			<version>0.6.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ru.r2cloud</groupId>
