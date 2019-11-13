@@ -1,0 +1,20 @@
+{
+  "signals": [
+    {
+      "name": "AM Broadcast Radio",
+      "description": "Local AM Radio",
+      "governingBody": "US FCC",
+      "floorFrequencyHz": 535000,
+      "ceilingFrequencyHz": 1605000,
+      "type": "io.onemfive.radio.signals.AMVoiceSignal"
+    },
+    {
+      "name": "CB Radio",
+      "description": "Radio usually used by truckers",
+      "governingBody": "US FCC",
+      "floorFrequencyHz": 29965000,
+      "ceilingFrequencyHz": 27405000,
+      "type": "io.onemfive.radio.signals.AMVoiceSignal"
+    }
+  ]
+}
