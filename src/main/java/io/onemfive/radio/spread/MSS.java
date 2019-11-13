@@ -1,4 +1,4 @@
-package io.onemfive.radio.signals;
+package io.onemfive.radio.spread;
 
 /**
  * Multi-Spread Spectrum

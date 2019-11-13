@@ -261,15 +261,11 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         String radioDef = properties.getProperty(Radio.class.getName());
         if(radioDef!=null) {
             try {
-                radio = (Radio)Class.forName(radioDef).newInstance();
+                radio = (Radio)Class.forName(radioDef).getConstructor().newInstance();
             } catch (Exception e) {
                 LOG.warning("Unable to instantiate Radio of type: "+radioDef+"\n\tException: "+e.getLocalizedMessage());
                 return false;
             }
-        }
-        if(radio==null) {
-            // Default to GNURadio
-            radio = new GNURadio();
         }
 
         if(!loadLocalNode()) {

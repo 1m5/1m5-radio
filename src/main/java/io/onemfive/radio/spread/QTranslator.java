@@ -1,4 +1,4 @@
-package io.onemfive.radio.signals;
+package io.onemfive.radio.spread;
 
 import io.onemfive.data.util.FileUtil;
 
