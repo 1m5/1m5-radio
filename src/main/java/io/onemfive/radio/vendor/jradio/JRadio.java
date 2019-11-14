@@ -28,9 +28,8 @@ public class JRadio extends VendorRadio {
     private RtlTcp tcp;
 
     @Override
-    public int sendMessage(RadioDatagram datagram, Properties options) {
-        LOG.warning("JRadio sendMessage not yet implemented.");
-        return 0;
+    public void sendDatagram(RadioDatagram datagram) {
+
     }
 
     @Override

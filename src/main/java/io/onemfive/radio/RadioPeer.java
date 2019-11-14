@@ -5,10 +5,15 @@ import io.onemfive.data.DID;
 import io.onemfive.data.JSONSerializable;
 import io.onemfive.data.NetworkPeer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A peer on the Radio network.
  */
 public class RadioPeer extends NetworkPeer implements Addressable, JSONSerializable {
+
+    private List<Signal> availableSignals = new ArrayList<>();
 
     public RadioPeer() {
         this(null, null);
@@ -20,6 +25,35 @@ public class RadioPeer extends NetworkPeer implements Addressable, JSONSerializa
 
     public RadioPeer(NetworkPeer peer) {
         fromMap(peer.toMap());
+    }
+
+    public void addAvailableSignal(Signal signal){
+        availableSignals.add(signal);
+    }
+
+    public void removeAvailableSignal(Signal signal) {
+        availableSignals.remove(signal);
+    }
+
+    public List<Signal> getAvailableSignals() {
+        return availableSignals;
+    }
+
+    public void clearAvailableSignals(){
+        availableSignals.clear();
+    }
+
+    public Signal mostAvailableSignal() {
+        if(availableSignals.size()==0) {
+            return null;
+        }
+        Signal signal = availableSignals.get(0);
+        for(Signal s : availableSignals) {
+            if(s.getScore() > signal.getScore()) {
+                signal = s;
+            }
+        }
+        return signal;
     }
 
     @Override

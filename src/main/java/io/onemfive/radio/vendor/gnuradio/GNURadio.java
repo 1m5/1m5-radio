@@ -1,8 +1,6 @@
 package io.onemfive.radio.vendor.gnuradio;
 
-import io.onemfive.radio.Radio;
 import io.onemfive.radio.RadioDatagram;
-import io.onemfive.radio.RadioSession;
 import io.onemfive.radio.vendor.VendorRadio;
 
 import java.util.Properties;
@@ -19,11 +17,23 @@ public class GNURadio extends VendorRadio {
 
     private Logger LOG = Logger.getLogger(GNURadio.class.getName());
 
-    public int sendMessage(RadioDatagram datagram, Properties options) {
-        LOG.warning("GNURadio sendMessage not yet implemented.");
-        return 0;
+    @Override
+    public void sendDatagram(RadioDatagram datagram) {
+
     }
 
-    public native int sendMessage(byte[] message);
+    @Override
+    public boolean start(Properties properties) {
+        return super.start(properties);
+    }
 
+    @Override
+    public boolean shutdown() {
+        return super.shutdown();
+    }
+
+    @Override
+    public boolean gracefulShutdown() {
+        return super.gracefulShutdown();
+    }
 }

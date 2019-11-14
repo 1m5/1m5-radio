@@ -8,14 +8,19 @@ import io.onemfive.data.Envelope;
 import io.onemfive.data.EventMessage;
 import io.onemfive.data.NetworkPeer;
 import io.onemfive.data.util.*;
+import io.onemfive.radio.signals.SignalBase;
 import io.onemfive.radio.tasks.TaskRunner;
-import io.onemfive.radio.vendor.gnuradio.GNURadio;
 import io.onemfive.sensors.*;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import static io.onemfive.sensors.SensorStatus.NETWORK_CONNECTED;
+import static io.onemfive.sensors.SensorStatus.NETWORK_STOPPED;
 
 /**
  * Manages communications across the full radio electromagnetic spectrum
@@ -25,13 +30,15 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
 
     private static final Logger LOG = Logger.getLogger(RadioSensor.class.getName());
     private static String LOCAL_NODE_FILE_NAME = "sdr";
+    private static String SIGNALS_FILE_NAME = "signals.json";
 
     private Properties properties;
     private Radio radio;
-    private RadioSession session;
     private TaskRunner taskRunner;
     private RadioPeer localNode;
     private File localNodeFile;
+    private File signalsFile;
+    private List<Signal> signals;
 
     public RadioSensor(SensorManager sensorManager, Envelope.Sensitivity sensitivity, Integer priority) {
         super(sensorManager, sensitivity, priority);
@@ -91,6 +98,17 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             LOG.warning("Content longer than "+RadioDatagramBuilder.DATAGRAM_MAX_SIZE+". May have issues.");
         }
 
+        RadioPeer toRPeer = (RadioPeer)toPeer;
+        Signal signal = toRPeer.mostAvailableSignal();
+        if(signal==null) {
+            LOG.warning("Unhandled issue #1 here.");
+            return false;
+        }
+        RadioSession session = radio.getSession(signal, true);
+        if(session==null) {
+            LOG.warning("Unhandled issue #2 here.");
+            return false;
+        }
         RadioDatagramBuilder builder = new RadioDatagramBuilder(session);
         RadioDatagram datagram = builder.makeRadioDatagram(request.content.getBytes());
         Properties options = new Properties();
@@ -125,12 +143,11 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      * log an error.
      *
      * @param session session to notify
-     * @param msgId message number available
-     * @param size size of the message - why it's a long and not an int is a mystery
+     * @param port message port available
      */
     @Override
-    public void messageAvailable(RadioSession session, int msgId, long size) {
-        RadioDatagram d = session.receiveMessage(msgId);
+    public void messageAvailable(RadioSession session, Integer port) {
+        RadioDatagram d = session.receiveMessage(port);
         LOG.info("Received Radio Message:\n\tFrom: " + d.from.getSDRAddress());
         Envelope e = Envelope.eventFactory(EventMessage.Type.TEXT);
         DID did = new DID();
@@ -144,6 +161,13 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         sensorManager.sendToBus(e);
     }
 
+    @Override
+    public void connected(RadioSession session) {
+        LOG.info("Radio Session reporting connection.");
+        updateStatus(NETWORK_CONNECTED);
+        routerStatusChanged();
+    }
+
     /**
      * Notify the service that the session has been terminated.
      * All registered listeners will be called.
@@ -152,7 +176,10 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      */
     @Override
     public void disconnected(RadioSession session) {
-        LOG.warning("Radio Session reporting disconnection.");
+        LOG.info("Radio Session reporting disconnection.");
+        if(radio.disconnected()){
+            updateStatus(NETWORK_STOPPED);
+        }
         routerStatusChanged();
     }
 
@@ -166,13 +193,12 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      */
     @Override
     public void errorOccurred(RadioSession session, String message, Throwable throwable) {
-        LOG.severe("Router says: "+message+": "+throwable.getLocalizedMessage());
+        LOG.warning("Router says: "+message+": "+throwable.getLocalizedMessage());
         routerStatusChanged();
     }
 
     public void checkRouterStats() {
-        LOG.info("RadioSensor stats:" +
-                "\n\t...");
+        LOG.info("RadioSensor status:\n\t"+getStatus().name());
     }
 
     private void routerStatusChanged() {
@@ -187,7 +213,6 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
                 break;
             case NETWORK_STOPPED:
                 statusText = "Disconnected from Radio Network.";
-                restart();
                 break;
             default: {
                 statusText = "Unhandled Radio Network Status: "+getStatus().name();
@@ -197,20 +222,59 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     }
 
     /**
-     * Sets up a {@link RadioSession}, using the Radio Destination stored on disk or creating a new Radio
-     * destination if no key file exists.
+     * Sets up a list of {@link RadioSession}, using the list of active Radio Signals stored on disk or creating a new Radio
+     * Signals file if no file exists.
      */
-    private void initializeSession() throws Exception {
-        LOG.info("Initializing Radio Session....");
+    private void initializeSessions() throws Exception {
+        LOG.info("Initializing Radio Sessions....");
         updateStatus(SensorStatus.INITIALIZING);
-
-        Properties sessionProperties = new Properties();
-        session = new RadioSession(radio);
-        session.connect();
-        session.addSessionListener(this);
-
-        taskRunner = new TaskRunner(this, sessionProperties);
+        taskRunner = new TaskRunner(this, properties);
+        if(signalsFile==null || signals==null) {
+            loadSignals();
+        }
+        RadioSession rs;
+        for(Signal s : signals) {
+            rs = radio.establishSession(s);
+            rs.addSessionListener(this);
+            taskRunner.addTask(new EstablishSession(rs, this, taskRunner, properties));
+        }
         taskRunner.start();
+    }
+
+    private boolean loadSignals() {
+        signals = new ArrayList<>();
+        if(signalsFile==null) {
+            signalsFile = new File(getDirectory(), SIGNALS_FILE_NAME);
+        }
+        if(!signalsFile.exists()) {
+            try {
+                if(!signalsFile.createNewFile()) {
+                    return false;
+                }
+            } catch (IOException e) {
+                LOG.warning(e.getLocalizedMessage());
+                return false;
+            }
+        }
+        if(signalsFile.length() > 0) {
+            String json = FileUtil.readTextFile(signalsFile.getAbsolutePath(), 100000, true);
+            Map<String, Object> mS = (Map<String, Object>) JSONParser.parse(json);
+            List<Map<String,Object>> mL = (List<Map<String,Object>>)mS.get("signals");
+            SignalBase s;
+            for(Map<String,Object> m : mL) {
+                String t = (String)m.get("type");
+                try {
+                    s = (SignalBase)Class.forName(t).getConstructor().newInstance();
+                } catch (Exception e) {
+                    LOG.warning(e.getLocalizedMessage());
+                    return false;
+                }
+                s.fromMap(m);
+                signals.add(s);
+                LOG.info("RadioSensor Signal: " + s.toString());
+            }
+        }
+        return true;
     }
 
     public RadioPeer getLocalNode() {
@@ -274,6 +338,11 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
 
         if(radio.start(properties)) {
             updateStatus(SensorStatus.NETWORK_CONNECTING);
+            try {
+                initializeSessions();
+            } catch (Exception e) {
+                LOG.warning(e.getLocalizedMessage());
+            }
             return true;
         } else {
             updateStatus(SensorStatus.NETWORK_ERROR);

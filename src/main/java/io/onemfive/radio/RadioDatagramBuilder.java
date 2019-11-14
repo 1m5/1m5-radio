@@ -10,6 +10,12 @@ public class RadioDatagramBuilder {
     }
 
     public RadioDatagram makeRadioDatagram(byte[] payload) {
+
+        return null;
+    }
+
+    public byte[] serializeRadioDatagram(RadioDatagram datagram) {
+
         return null;
     }
 }

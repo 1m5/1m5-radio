@@ -1,5 +1,6 @@
 package io.onemfive.radio.tasks;
 
+import io.onemfive.core.util.AppThread;
 import io.onemfive.radio.RadioSensor;
 
 import java.util.Properties;
@@ -7,7 +8,8 @@ import java.util.Properties;
 /**
  * A task for the Radio Sensor.
  */
-public abstract class RadioTask {
+public abstract class RadioTask extends AppThread {
+
     protected RadioSensor sensor;
     protected TaskRunner taskRunner;
     protected Properties properties;
@@ -16,6 +18,7 @@ public abstract class RadioTask {
     protected boolean started = false;
     protected boolean completed = false;
     protected boolean longRunning = false;
+    protected boolean startRunning = false;
 
     public RadioTask(RadioSensor sensor, TaskRunner taskRunner, Properties properties) {
         this.sensor = sensor;
@@ -34,7 +37,15 @@ public abstract class RadioTask {
 
     public abstract boolean runTask();
 
-    public boolean isLongRunning() {return longRunning;}
+    public void setLongRunning(boolean longRunning) {
+        this.longRunning = longRunning;
+    }
+
+    public void setStartRunning(boolean startRunning) {
+        this.startRunning = startRunning;
+    }
+
+    public boolean getLongRunning() {return longRunning;}
 
     public void setLastCompletionTime(long lastCompletionTime) {
         this.lastCompletionTime = lastCompletionTime;

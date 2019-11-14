@@ -3,6 +3,8 @@ package io.onemfive.radio.tasks;
 import io.onemfive.core.util.AppThread;
 import io.onemfive.radio.RadioSensor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -16,10 +18,12 @@ public class TaskRunner extends AppThread {
     private static final Logger LOG = Logger.getLogger(TaskRunner.class.getName());
 
     public enum Status {Running, Stopping, Shutdown}
-    private static final short timeBetweenRunsMinutes = 10;
 
+    private long timeBetweenRunsMs = 1000; // every second check to see if a task needs running
+    private List<RadioTask> tasks = new ArrayList<>();
     private Status status = Status.Shutdown;
     private RadioSensor sensor;
+
     private Properties properties;
 
     public TaskRunner(RadioSensor sensor, Properties properties) {
@@ -27,26 +31,94 @@ public class TaskRunner extends AppThread {
         this.properties = properties;
     }
 
+    // Run Task immediately but track it
+    public void executeTask(RadioTask t) {
+        if(t.longRunning) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    t.runTask();
+                }
+            };
+            new Thread(r).start();
+        } else {
+            if(t.runTask())
+                t.setLastCompletionTime(System.currentTimeMillis());
+            else
+                LOG.warning("Task exited as failure.");
+        }
+    }
+
+    public void addTask(RadioTask t) {
+        // Ensure time between runs is at least the lowest task periodicity
+        if(t.getPeriodicity() > 0 && t.getPeriodicity() < timeBetweenRunsMs)
+            timeBetweenRunsMs = t.getPeriodicity();
+        tasks.add(t);
+    }
+
+    public void removeTask(RadioTask t) {
+        tasks.remove(t);
+        long def = 2 * 60 * 1000;
+        for(RadioTask task : tasks) {
+            if(task.getPeriodicity() < def) {
+                def = task.getPeriodicity();
+            }
+        }
+        if(timeBetweenRunsMs != def) {
+            timeBetweenRunsMs = def;
+            LOG.info("Changed TaskRunner.timeBetweenRuns in ms to: "+timeBetweenRunsMs);
+        }
+    }
+
     @Override
     public void run() {
         status = Status.Running;
-        LOG.info("RadioSensor Task Runner running...");
+        LOG.info("Radio Sensor: Task Runner running...");
         while(status == Status.Running) {
-            sensor.checkRouterStats();
             try {
+                LOG.fine("Radio Sensor: Sleeping for "+(timeBetweenRunsMs/(60*1000))+" minutes..");
                 synchronized (this) {
-                    this.wait(timeBetweenRunsMinutes * 60 * 1000);
+                    this.wait(timeBetweenRunsMs);
                 }
             } catch (InterruptedException ex) {
             }
+            LOG.finer("Radio Sensor: Awoke, determine if tasks ("+tasks.size()+") need ran...");
+            for (RadioTask t : tasks) {
+                if (t.getPeriodicity() == -1) {
+                    continue; // Flag to not run
+                }
+                if(t.started) {
+                    LOG.finer("Radio Sensor: Task in progress.");
+                } else if(t.startRunning || (System.currentTimeMillis() - t.getLastCompletionTime()) > t.getPeriodicity()) {
+                    t.startRunning = false; // Ensure we don't run this again without verifying periodicity
+                    if(t.longRunning) {
+                        Runnable r = new Runnable() {
+                            @Override
+                            public void run() {
+                                t.runTask();
+                            }
+                        };
+                        new Thread(r).start();
+                    } else {
+                        if(t.runTask())
+                            t.setLastCompletionTime(System.currentTimeMillis());
+                        else
+                            LOG.warning("Radio Sensor: Task exited as incomplete.");
+                    }
+                } else {
+                    LOG.finer("Radio Sensor: Either startRunning is false or it's not yet time to start.");
+                }
+                if(t.completed)
+                    removeTask(t);
+            }
         }
-        LOG.info("RadioSensor Task Runner Stopped.");
+        LOG.info("Radio Sensor: Task Runner Stopped.");
         status = Status.Shutdown;
     }
 
     public void shutdown() {
         status = Status.Stopping;
-        LOG.info("Signaled Task Runner to shutdown after all tasks complete...");
+        LOG.info("Radio Sensor: Signaled Task Runner to shutdown after all tasks complete...");
     }
 
 }
