@@ -46,6 +46,8 @@ solution in more detail. You can start selling know, but avoid grandiose claims;
 Be sure to show how your solution is vastly superior to the competition. Remember your audience and use appropriate 
 language and level of detail. This is the heart of your white paper and you'll probably want to use case studies or 
 customer testimonials to support your arguments.]
+Upon startup, the Radio Sensor loads the radio-sensor.config file to configure itself instantiating an instance of the 
+radio library to be used, e.g. GNU Radio. 
 
 ## Benefits
 [This section is the soul of your white paper, where you need to grab the reader where he or she lives and provide 
