@@ -4,9 +4,9 @@ package io.onemfive.radio.bands;
  * Ultra High Frequency
  * From 300 Mhz to 2,999,999,999 Hz
  */
-public class UHF extends ITUBand {
+public class UHFITU extends Band {
 
-    public UHF() {
+    public UHFITU() {
         super(300000000, 2999999999L);
     }
 }

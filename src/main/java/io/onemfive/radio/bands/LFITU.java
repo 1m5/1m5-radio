@@ -4,9 +4,9 @@ package io.onemfive.radio.bands;
  * Low Frequency
  * From 30 KHz to 299,999 Hz
  */
-public class LF extends ITUBand {
+public class LFITU extends Band {
 
-    public LF() {
+    public LFITU() {
         super(30000, 299999);
     }
 }
