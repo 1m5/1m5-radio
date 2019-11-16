@@ -1,4 +1,6 @@
-package io.onemfive.radio.signals;
+package io.onemfive.radio.signals.ais;
+
+import io.onemfive.radio.signals.NFMDataSignal;
 
 /**
  * AIS is an automatic tracking system that uses transponders on ships and is used by vessel traffic services (VTS).
@@ -7,6 +9,6 @@ package io.onemfive.radio.signals;
  *
  * https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1371-4-201004-S!!PDF-E.pdf
  */
-public class AISSignal extends NFMDataSignal {
-
+public class AISSignal {
+    private NFMDataSignal dataSignal;
 }
