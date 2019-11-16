@@ -4,4 +4,5 @@ import io.onemfive.radio.signals.NFMDataSignal;
 
 public class PagerSignal {
     private NFMDataSignal signal;
+
 }
