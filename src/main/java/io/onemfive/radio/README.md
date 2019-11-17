@@ -23,7 +23,7 @@ is instantiated and configured for each entry in the signals.json file found on 
 * jamming - detection and handling of jamming
 * satellite - satellite-specific communication support
 * signals - use of bands for a specific communication need
-* spread - 
-* tasks
-* tuning
-* vendor
+* spread - methods by which a signal generated with a particular bandwidth is deliberately spread in the frequency domain resulting in a signal with a wider bandwidth.
+* tasks - tasks ran in their own thread
+* tuning - tuners for tuning a radio to specific frequencies
+* vendor - software vendor integrations
