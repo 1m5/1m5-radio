@@ -1,4 +1,4 @@
-package io.onemfive.radio.spread;
+package io.onemfive.radio.contacts;
 
 import io.onemfive.data.util.FileUtil;
 

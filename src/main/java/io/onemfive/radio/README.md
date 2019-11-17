@@ -11,17 +11,19 @@ is instantiated and configured for each entry in the signals.json file found on 
 
 
 ## Packages
-* bands
-* channels
-* contacts
-* detection
-* discovery
-* filters
-* hardware
-* jamming
-* satellite
-* signals
-* spread
+* balloons - balloons as a radio relay
+* bands - radio bandwidth defined by ITU
+* channels - specific radio frequency selected for communications
+* contacts - communication codes
+* detection - detection of radio communications
+* discovery - discovery of 1M5 radio peers
+* drones - drones as a radio relay
+* filters - filtering of incoming/outgoing messages
+* hardware - hardware-specific configuration information
+* jamming - detection and handling of jamming
+* satellite - satellite-specific communication support
+* signals - use of bands for a specific communication need
+* spread - 
 * tasks
 * tuning
 * vendor
