@@ -1,5 +1,7 @@
 package io.onemfive.radio.spread;
 
+import io.onemfive.radio.contacts.QSignal;
+import io.onemfive.radio.contacts.QTranslator;
 import org.junit.Test;
 
 public class SignalTest {
