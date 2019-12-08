@@ -34,7 +34,7 @@
 
 	<profiles>
 		<profile>
-			<id>devnet</id>
+			<id>devnet-gnu</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -43,22 +43,84 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>integrationnet</id>
+			<id>integrationnet-gnu</id>
 			<properties>
 				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
-			<id>testnet</id>
+			<id>testnet-gnu</id>
 			<properties>
 				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
 		</profile>
 		<profile>
-			<id>mainnet</id>
+			<id>mainnet-gnu</id>
 			<properties>
 				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.gnuradio.GNURadio</io.onemfive.radio.Radio>
 			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>ru.r2cloud</groupId>
+					<artifactId>jradio</artifactId>
+					<version>1.16-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>devnet-jradio</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.jradio.JRadio</io.onemfive.radio.Radio>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>ru.r2cloud</groupId>
+					<artifactId>jradio</artifactId>
+					<version>1.16-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>integrationnet-jradio</id>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.jradio.JRadio</io.onemfive.radio.Radio>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>ru.r2cloud</groupId>
+					<artifactId>jradio</artifactId>
+					<version>1.16-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>testnet-jradio</id>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.jradio.JRadio</io.onemfive.radio.Radio>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>ru.r2cloud</groupId>
+					<artifactId>jradio</artifactId>
+					<version>1.16-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>mainnet-jradio</id>
+			<properties>
+				<io.onemfive.radio.Radio>io.onemfive.radio.vendor.jradio.JRadio</io.onemfive.radio.Radio>
+			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>ru.r2cloud</groupId>
+					<artifactId>jradio</artifactId>
+					<version>1.16-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 
@@ -74,11 +136,6 @@
 			<groupId>io.onemfive</groupId>
 			<artifactId>sensors</artifactId>
 			<version>0.6.2-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>ru.r2cloud</groupId>
-			<artifactId>jradio</artifactId>
-			<version>1.16-SNAPSHOT</version>
 		</dependency>
 		<!-- Test -->
 		<dependency>
