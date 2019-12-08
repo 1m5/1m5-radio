@@ -10,13 +10,11 @@ import io.onemfive.data.NetworkPeer;
 import io.onemfive.data.util.*;
 import io.onemfive.radio.signals.SignalBase;
 import io.onemfive.radio.tasks.TaskRunner;
+import io.onemfive.radio.technologies.RadioTech;
 import io.onemfive.sensors.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static io.onemfive.sensors.SensorStatus.NETWORK_CONNECTED;
@@ -39,6 +37,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     private File localNodeFile;
     private File signalsFile;
     private List<Signal> signals;
+    private Map<String, RadioTech> techMap = new HashMap<>();
 
     public RadioSensor(SensorManager sensorManager, Envelope.Sensitivity sensitivity, Integer priority) {
         super(sensorManager, sensitivity, priority);
