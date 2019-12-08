@@ -1,4 +1,6 @@
 package io.onemfive.radio.technologies.wifidirect;
 
-public class WiFiDirect {
+import io.onemfive.radio.technologies.RadioTech;
+
+public class WiFiDirect implements RadioTech {
 }

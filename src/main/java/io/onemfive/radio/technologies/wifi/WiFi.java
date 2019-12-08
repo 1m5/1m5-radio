@@ -1,4 +1,6 @@
 package io.onemfive.radio.technologies.wifi;
 
-public class WiFi {
+import io.onemfive.radio.technologies.RadioTech;
+
+public class WiFi implements RadioTech {
 }
