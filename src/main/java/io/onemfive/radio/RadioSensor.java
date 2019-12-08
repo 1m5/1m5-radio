@@ -111,7 +111,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
         RadioDatagramBuilder builder = new RadioDatagramBuilder(session);
         RadioDatagram datagram = builder.makeRadioDatagram(request.content.getBytes());
         Properties options = new Properties();
-        if(session.sendMessage(datagram, options)) {
+        if(radio.sendDatagram(datagram, session)) {
             LOG.info("Radio Message sent.");
             return true;
         } else {
@@ -146,7 +146,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      */
     @Override
     public void messageAvailable(RadioSession session, Integer port) {
-        RadioDatagram d = session.receiveMessage(port);
+        RadioDatagram d = radio.receiveDatagram(session, port);
         LOG.info("Received Radio Message:\n\tFrom: " + d.from.getSDRAddress());
         Envelope e = Envelope.eventFactory(EventMessage.Type.TEXT);
         DID did = new DID();

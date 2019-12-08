@@ -27,16 +27,6 @@ public class RadioSession {
         this.signal = signal;
     }
 
-    public boolean sendMessage(RadioDatagram datagram, Properties options) {
-        radio.sendDatagram(datagram);
-        return false;
-    }
-
-    public RadioDatagram receiveMessage(Integer port) {
-
-        return null;
-    }
-
     public boolean connect() {
         socket = new SignalSocket(radio, signal);
         status = Status.CONNECTING;

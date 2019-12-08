@@ -1,6 +1,7 @@
 package io.onemfive.radio.vendor.gnuradio;
 
 import io.onemfive.radio.RadioDatagram;
+import io.onemfive.radio.RadioSession;
 import io.onemfive.radio.vendor.VendorRadio;
 
 import java.util.Properties;
@@ -18,8 +19,13 @@ public class GNURadio extends VendorRadio {
     private Logger LOG = Logger.getLogger(GNURadio.class.getName());
 
     @Override
-    public void sendDatagram(RadioDatagram datagram) {
+    public Boolean sendDatagram(RadioDatagram datagram, RadioSession session) {
+        return false;
+    }
 
+    @Override
+    public RadioDatagram receiveDatagram(RadioSession session, Integer port) {
+        return null;
     }
 
     @Override

@@ -28,8 +28,13 @@ public class JRadio extends VendorRadio {
     private RtlTcp tcp;
 
     @Override
-    public void sendDatagram(RadioDatagram datagram) {
+    public Boolean sendDatagram(RadioDatagram datagram, RadioSession session) {
+        return false;
+    }
 
+    @Override
+    public RadioDatagram receiveDatagram(RadioSession session, Integer port) {
+        return null;
     }
 
     @Override
