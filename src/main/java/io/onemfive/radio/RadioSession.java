@@ -12,6 +12,7 @@ public interface RadioSession {
     Radio getRadio();
     boolean connect();
     boolean disconnect();
+    boolean isConnected();
     void addSessionListener(RadioSessionListener listener);
     void removeSessionListener(RadioSessionListener listener);
     Status getStatus();
