@@ -88,6 +88,7 @@ public class DeviceDiscovery extends RadioTask implements DiscoveryListener {
         synchronized(inquiryCompletedEvent){
             inquiryCompletedEvent.notifyAll();
         }
+        lastCompletionTime = System.currentTimeMillis();
         started = false;
     }
 

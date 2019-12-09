@@ -71,6 +71,7 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
                 LOG.warning(e.getLocalizedMessage());
             }
         }
+        lastCompletionTime = System.currentTimeMillis();
         started = false;
         return true;
     }
