@@ -88,7 +88,10 @@ public class TaskRunner extends AppThread {
                     continue; // Flag to not run
                 }
                 if(t.started) {
-                    LOG.finer("Radio Sensor: Task in progress.");
+                    LOG.finer("Task in progress.");
+                } else if(t.maxRuns > 0 && t.runs > t.maxRuns) {
+                    LOG.info("Max runs reached.");
+                    t.completed = true;
                 } else if(t.startRunning || (System.currentTimeMillis() - t.getLastCompletionTime()) > t.getPeriodicity()) {
                     t.startRunning = false; // Ensure we don't run this again without verifying periodicity
                     if(t.longRunning) {

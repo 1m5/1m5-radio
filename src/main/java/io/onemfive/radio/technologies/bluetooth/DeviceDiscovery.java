@@ -1,6 +1,5 @@
 package io.onemfive.radio.technologies.bluetooth;
 
-import io.onemfive.core.util.AppThread;
 import io.onemfive.radio.RadioSensor;
 import io.onemfive.radio.tasks.RadioTask;
 import io.onemfive.radio.tasks.TaskRunner;
@@ -23,6 +22,7 @@ public class DeviceDiscovery extends RadioTask implements DiscoveryListener {
     public DeviceDiscovery(Map<String, RemoteDevice> devices, RadioSensor sensor, TaskRunner taskRunner, Properties properties, Long periodicity) {
         super(sensor, taskRunner, properties, periodicity);
         this.devices = devices;
+        startRunning = true;
     }
 
     public int getResult() {
@@ -31,10 +31,12 @@ public class DeviceDiscovery extends RadioTask implements DiscoveryListener {
 
     @Override
     public boolean runTask() {
+        super.runTask();
+        started = true;
         try {
             synchronized (inquiryCompletedEvent) {
-                boolean started = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, this);
-                if (started) {
+                boolean inquiring = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, this);
+                if (inquiring) {
                     LOG.info("wait for device inquiry to complete...");
                     inquiryCompletedEvent.wait();
                 }
@@ -86,6 +88,7 @@ public class DeviceDiscovery extends RadioTask implements DiscoveryListener {
         synchronized(inquiryCompletedEvent){
             inquiryCompletedEvent.notifyAll();
         }
+        started = false;
     }
 
     @Override

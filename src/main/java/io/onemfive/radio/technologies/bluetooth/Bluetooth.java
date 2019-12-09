@@ -53,15 +53,19 @@ public class Bluetooth extends BaseRadio {
     @Override
     public boolean start(Properties properties) {
         this.properties = properties;
+
         if(taskRunner==null) {
             taskRunner = new TaskRunner(sensor, properties);
         }
-        deviceDiscovery = new DeviceDiscovery(devices, sensor, taskRunner, properties, 10 * 1000L); // every 10 seconds
+
+        deviceDiscovery = new DeviceDiscovery(devices, sensor, taskRunner, properties, 60 * 60 * 1000L);
         deviceDiscovery.setLongRunning(true);
         taskRunner.addTask(deviceDiscovery);
-//        serviceDiscovery = new ServiceDiscovery(devices, deviceServices, peers, sensor, taskRunner, properties, 10 * 1000L); // every 10 seconds
-//        serviceDiscovery.setLongRunning(true);
-//        taskRunner.addTask(serviceDiscovery);
+
+        serviceDiscovery = new ServiceDiscovery(devices, deviceServices, peers, sensor, taskRunner, properties, 30 * 1000L);
+        serviceDiscovery.setLongRunning(true);
+        taskRunner.addTask(serviceDiscovery);
+
         if(!taskRunner.isAlive()) {
             taskRunner.start();
         }

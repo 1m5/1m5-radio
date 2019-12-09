@@ -1,4 +1,5 @@
 # GNU Radio for Full Radio Spectrum access
+Slated for 1M5 0.8.6
 
 ## Installation
 Installation instructions: https://wiki.gnuradio.org/index.php/InstallingGR

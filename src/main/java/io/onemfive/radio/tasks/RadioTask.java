@@ -19,6 +19,8 @@ public abstract class RadioTask extends AppThread {
     protected boolean completed = false;
     protected boolean longRunning = false;
     protected boolean startRunning = false;
+    protected int runs = 0;
+    protected int maxRuns = 0;
 
     public RadioTask(RadioSensor sensor, TaskRunner taskRunner, Properties properties) {
         this.sensor = sensor;
@@ -35,7 +37,18 @@ public abstract class RadioTask extends AppThread {
         this.periodicity = periodicity;
     }
 
-    public abstract boolean runTask();
+    public boolean runTask() {
+        runs++;
+        return true;
+    }
+
+    public int getRuns() {
+        return runs;
+    }
+
+    public int getMaxRuns() {
+        return  maxRuns;
+    }
 
     public void setLongRunning(boolean longRunning) {
         this.longRunning = longRunning;

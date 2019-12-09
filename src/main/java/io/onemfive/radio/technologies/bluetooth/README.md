@@ -1,5 +1,5 @@
 # Bluetooth
-Slated for 0.8.3
+Slated for 1M5 0.8.3
 
 ## Install BlueCove
 

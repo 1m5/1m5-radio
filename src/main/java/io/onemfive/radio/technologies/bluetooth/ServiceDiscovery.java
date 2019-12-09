@@ -30,6 +30,7 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
         this.devices = devices;
         this.deviceServices = deviceServices;
         this.peers = peers;
+        startRunning = false;
     }
 
     public int getResult() {
@@ -38,20 +39,24 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
 
     @Override
     public boolean runTask() {
+        super.runTask();
+        started = true;
         UUID obexObjPush = ServiceClasses.getUUID(ServiceClasses.OBEX_OBJECT_PUSH);
 //        if ((properties != null) && (properties.size() > 0)) {
 //            objPush = new UUID(args[0], false);
 //        }
-        UUID obexFileXfer = ServiceClasses.getUUID(ServiceClasses.OBEX_FILE_TRANSFER);
-        UUID oneMFiveObjPush = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_OBJECT_PUSH);
-        UUID oneMFiveFileXfer = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_FILE_TRANSFER);
+//        UUID obexFileXfer = ServiceClasses.getUUID(ServiceClasses.OBEX_FILE_TRANSFER);
+//        UUID oneMFiveObjPush = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_OBJECT_PUSH);
+//        UUID oneMFiveFileXfer = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_FILE_TRANSFER);
 
-        UUID[] searchUuidSet = new UUID[] { obexObjPush, obexFileXfer, oneMFiveObjPush, oneMFiveFileXfer };
+        UUID[] searchUuidSet = new UUID[] { obexObjPush };
+//        UUID[] searchUuidSet = new UUID[] { obexObjPush, obexFileXfer, oneMFiveObjPush, oneMFiveFileXfer };
 
         int[] attrIDs =  new int[] {
                 0x0100 // Service name
         };
         Collection<RemoteDevice> deviceList = devices.values();
+        LOG.info(deviceList.size()+" devices to search services on...");
         for(RemoteDevice device : deviceList) {
             currentDevice = device;
             try {
@@ -62,12 +67,11 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
                 }
             } catch (IOException e) {
                 LOG.warning(e.getLocalizedMessage());
-                return false;
             } catch (InterruptedException e) {
                 LOG.warning(e.getLocalizedMessage());
-                return false;
             }
         }
+        started = false;
         return true;
     }
 
@@ -83,7 +87,7 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
 
     @Override
     public void servicesDiscovered(int transID, ServiceRecord[] serviceRecords) {
-        LOG.info("Services returned for transID: "+transID);
+        LOG.info(serviceRecords.length+" Services returned for transID: "+transID);
         for (int i = 0; i < serviceRecords.length; i++) {
             String url = serviceRecords[i].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
             if (url == null) {
@@ -117,6 +121,7 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
     @Override
     public void serviceSearchCompleted(int transID, int respCode) {
         result = respCode;
+        LOG.info("transID: "+transID);
         switch(respCode) {
             case DiscoveryListener.SERVICE_SEARCH_COMPLETED : {
                 LOG.info("Bluetooth search completed.");break;
@@ -125,7 +130,11 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
                 LOG.warning("Bluetooth search terminated.");break;
             }
             case DiscoveryListener.SERVICE_SEARCH_ERROR : {
-                LOG.severe("Bluetooth search erroed.");break;
+                LOG.warning("Bluetooth search errored. Removing device from list.");
+                devices.remove(currentDevice.getBluetoothAddress());
+                deviceServices.remove(currentDevice.getBluetoothAddress());
+                peers.remove(currentDevice.getBluetoothAddress());
+                break;
             }
             case DiscoveryListener.SERVICE_SEARCH_NO_RECORDS : {
                 try {

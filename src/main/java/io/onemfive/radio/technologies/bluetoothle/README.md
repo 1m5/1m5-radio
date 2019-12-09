@@ -1,2 +1,2 @@
 # Bluetooth Low Energy
-Slated for 0.8.4
+Slated for 1M5 0.8.4
