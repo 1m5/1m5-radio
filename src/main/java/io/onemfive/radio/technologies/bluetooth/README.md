@@ -7,3 +7,13 @@ Slated for 0.8.3
 sudo apt-get install libbluetooth-dev
 
 ### Raspberry Pi
+
+## Development
+
+### Links
+* http://www.bluecove.org/bluecove/apidocs/index.html
+* http://bluecove.org/bluecove-examples/index.html
+* http://bluecove.org/bluecove-gpl/index.html
+* https://code.google.com/archive/p/bluecove/wikis/Documentation.wiki
+* http://www.bluecove.org/bluecove/apidocs/javax/bluetooth/DiscoveryListener.html
+* https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
