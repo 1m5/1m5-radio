@@ -1,0 +1,100 @@
+package io.onemfive.radio.technologies.bluetooth;
+
+import io.onemfive.core.util.AppThread;
+import io.onemfive.radio.RadioSensor;
+import io.onemfive.radio.tasks.RadioTask;
+import io.onemfive.radio.tasks.TaskRunner;
+
+import javax.bluetooth.*;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+public class DeviceDiscovery extends RadioTask implements DiscoveryListener {
+
+    private static Logger LOG = Logger.getLogger(DeviceDiscovery.class.getName());
+
+    private final Object inquiryCompletedEvent = new Object();
+
+    private Map<String,RemoteDevice> devices;
+    private int result;
+
+    public DeviceDiscovery(Map<String, RemoteDevice> devices, RadioSensor sensor, TaskRunner taskRunner, Properties properties, Long periodicity) {
+        super(sensor, taskRunner, properties, periodicity);
+        this.devices = devices;
+    }
+
+    public int getResult() {
+        return result;
+    }
+
+    @Override
+    public boolean runTask() {
+        try {
+            synchronized (inquiryCompletedEvent) {
+                boolean started = LocalDevice.getLocalDevice().getDiscoveryAgent().startInquiry(DiscoveryAgent.GIAC, this);
+                if (started) {
+                    LOG.info("wait for device inquiry to complete...");
+                    inquiryCompletedEvent.wait();
+                }
+            }
+        } catch (BluetoothStateException e) {
+            LOG.warning(e.getLocalizedMessage());
+            return false;
+        } catch (InterruptedException e) {
+            LOG.warning(e.getLocalizedMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void deviceDiscovered(RemoteDevice remoteDevice, DeviceClass deviceClass) {
+        String msg = "Device " + remoteDevice.getBluetoothAddress() + " found.";
+        if(!devices.containsKey(remoteDevice.getBluetoothAddress())) {
+            msg += "\r\nKnown: false";
+            devices.put(remoteDevice.getBluetoothAddress(), remoteDevice);
+            try {
+                msg += "\r\nName: "+remoteDevice.getFriendlyName(false);
+            } catch (IOException e) {
+                LOG.info(e.getLocalizedMessage());
+            }
+        } else {
+            msg += "\r\nKnown: true";
+        }
+        LOG.info(msg);
+    }
+
+    @Override
+    public void inquiryCompleted(int discType) {
+        result = discType;
+        switch (discType) {
+            case DiscoveryListener.INQUIRY_COMPLETED : {
+                LOG.info("Bluetooth inquiry completed.");break;
+            }
+            case DiscoveryListener.INQUIRY_TERMINATED : {
+                LOG.warning("Bluetooth inquiry terminated.");break;
+            }
+            case DiscoveryListener.INQUIRY_ERROR : {
+                LOG.severe("Bluetooth inquiry errored.");break;
+            }
+            default: {
+                LOG.warning("Unknown Bluetooth inquiry result code: "+discType);
+            }
+        }
+        synchronized(inquiryCompletedEvent){
+            inquiryCompletedEvent.notifyAll();
+        }
+    }
+
+    @Override
+    public void servicesDiscovered(int transID, ServiceRecord[] serviceRecords) {
+        LOG.warning("servicesDiscovered() implemented in ServiceDiscovery.");
+    }
+
+    @Override
+    public void serviceSearchCompleted(int transID, int respCode) {
+        LOG.warning("serviceSearchCompleted() implemented in ServiceDiscovery.");
+    }
+}

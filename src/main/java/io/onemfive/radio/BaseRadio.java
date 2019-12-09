@@ -1,5 +1,6 @@
 package io.onemfive.radio;
 
+import io.onemfive.radio.tasks.TaskRunner;
 import io.onemfive.sensors.peers.PeerReport;
 
 import java.util.Collection;
@@ -14,6 +15,16 @@ public abstract class BaseRadio implements Radio {
 
     protected Map<Integer,RadioSession> sessions = new HashMap<>();
     protected PeerReport peerReport;
+    protected RadioSensor sensor;
+    protected TaskRunner taskRunner;
+
+    public void setRadioSensor(RadioSensor sensor) {
+        this.sensor = sensor;
+    }
+
+    public void setTaskRunner(TaskRunner taskRunner) {
+        this.taskRunner = taskRunner;
+    }
 
     @Override
     public void setPeerReport(PeerReport peerReport) {
