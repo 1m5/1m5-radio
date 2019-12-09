@@ -73,7 +73,7 @@
 		<dependency>
 			<groupId>io.onemfive</groupId>
 			<artifactId>sensors</artifactId>
-			<version>0.6.2</version>
+			<version>0.6.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.bluecove</groupId>
