@@ -20,10 +20,10 @@ At this time, the [RTL-SDR](https://www.rtl-sdr.com/) dongle is being used to ge
 it's expected to move towards using [HackRF](https://greatscottgadgets.com/hackrf/one/)
 as the main production SDR. Additional SDRs are under review.
 
-## RTL-SDR
+### RTL-SDR
 https://www.rtl-sdr.com/
 
-## HackRF
+### HackRF
 https://greatscottgadgets.com/hackrf/one/
 
 ### Ettus
@@ -37,3 +37,17 @@ https://fairwaves.co/products/equipment/
 
 ## Installation
 1. Install GNU Radio: https://wiki.gnuradio.org/index.php/InstallingGR
+2, Install BlueCove
+
+## Roadmap
+
+* 0.1.0: Bluetooth
+* 0.2.0: Bluetooth LE
+* 0.3.0: WiFi Direct
+* 0.4.0: WiFi
+* 0.5.0: Satellite
+* 0.6.0: GNU Radio Full Spectrum
+* 0.7.0: ECM
+* 0.8.0: Full integration with Sensor Service
+* 0.9.0: Security Evalution
+* 1.0.0: Performance and Scalability Improvements for Core 0.9.0 Inclusion
