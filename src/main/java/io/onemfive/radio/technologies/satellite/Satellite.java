@@ -1,11 +1,11 @@
-package io.onemfive.radio.technologies.wifidirect;
+package io.onemfive.radio.technologies.satellite;
 
 import io.onemfive.radio.BaseRadio;
 import io.onemfive.radio.RadioDatagram;
 import io.onemfive.radio.RadioSession;
 import io.onemfive.sensors.SensorRequest;
 
-public class WiFiDirect extends BaseRadio {
+public class Satellite extends BaseRadio {
 
     @Override
     public RadioDatagram toRadioDatagram(SensorRequest request) {

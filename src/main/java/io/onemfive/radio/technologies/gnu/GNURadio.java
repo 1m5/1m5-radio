@@ -1,11 +1,22 @@
-package io.onemfive.radio.technologies.wifidirect;
+package io.onemfive.radio.technologies.gnu;
 
 import io.onemfive.radio.BaseRadio;
 import io.onemfive.radio.RadioDatagram;
 import io.onemfive.radio.RadioSession;
 import io.onemfive.sensors.SensorRequest;
 
-public class WiFiDirect extends BaseRadio {
+import java.util.logging.Logger;
+
+/**
+ * Wrapper for GNU Radio.
+ * https://www.gnuradio.org
+ * GNU Radio is licensed under the GPLv3 as of August 2019.
+ *
+ * @author objectorange
+ */
+public class GNURadio extends BaseRadio {
+
+    private Logger LOG = Logger.getLogger(GNURadio.class.getName());
 
     @Override
     public RadioDatagram toRadioDatagram(SensorRequest request) {

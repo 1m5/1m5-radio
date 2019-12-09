@@ -1,39 +1,29 @@
 package io.onemfive.radio.technologies.bluetoothle;
 
-import io.onemfive.core.LifeCycle;
-import io.onemfive.radio.technologies.RadioTech;
+import io.onemfive.radio.BaseRadio;
+import io.onemfive.radio.RadioDatagram;
+import io.onemfive.radio.RadioSession;
+import io.onemfive.sensors.SensorRequest;
 
-import java.util.Properties;
-
-public class BluetoothLE implements LifeCycle, RadioTech {
+public class BluetoothLE extends BaseRadio {
 
     @Override
-    public boolean start(Properties properties) {
-        return false;
+    public RadioDatagram toRadioDatagram(SensorRequest request) {
+        return null;
     }
 
     @Override
-    public boolean pause() {
-        return false;
+    public Boolean sendDatagram(RadioDatagram datagram, RadioSession session) {
+        return null;
     }
 
     @Override
-    public boolean unpause() {
-        return false;
+    public RadioDatagram receiveDatagram(RadioSession session, Integer port) {
+        return null;
     }
 
     @Override
-    public boolean restart() {
-        return false;
-    }
-
-    @Override
-    public boolean shutdown() {
-        return false;
-    }
-
-    @Override
-    public boolean gracefulShutdown() {
-        return false;
+    public RadioSession establishSession() {
+        return null;
     }
 }

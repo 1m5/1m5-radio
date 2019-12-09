@@ -1,4 +1,4 @@
-# GNU Radio
+# GNU Radio for Full Radio Spectrum access
 
 ## Installation
 Installation instructions: https://wiki.gnuradio.org/index.php/InstallingGR

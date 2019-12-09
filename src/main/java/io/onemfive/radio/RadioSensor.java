@@ -8,9 +8,8 @@ import io.onemfive.data.Envelope;
 import io.onemfive.data.EventMessage;
 import io.onemfive.data.NetworkPeer;
 import io.onemfive.data.util.*;
-import io.onemfive.radio.signals.SignalBase;
 import io.onemfive.radio.tasks.TaskRunner;
-import io.onemfive.radio.technologies.RadioTech;
+import io.onemfive.radio.technologies.TechnologyDetection;
 import io.onemfive.sensors.*;
 
 import java.io.*;
@@ -31,13 +30,10 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     private static String SIGNALS_FILE_NAME = "signals.json";
 
     private Properties properties;
-    private Radio radio;
     private TaskRunner taskRunner;
     private RadioPeer localNode;
     private File localNodeFile;
-    private File signalsFile;
-    private List<Signal> signals;
-    private Map<String, RadioTech> techMap = new HashMap<>();
+    private Map<String, Radio> radios = new HashMap<>();
 
     public RadioSensor(SensorManager sensorManager, Envelope.Sensitivity sensitivity, Integer priority) {
         super(sensorManager, sensitivity, priority);
@@ -57,6 +53,8 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     public String[] getURLEndsWith() {
         return new String[]{".sdr"};
     }
+
+
 
     /**
      * Sends UTF-8 content to a Radio Peer using Software Defined Radio (SDR).
@@ -91,25 +89,19 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             request.errorCode = SensorRequest.NO_CONTENT;
             return false;
         }
-        if(request.content.length() > RadioDatagramBuilder.DATAGRAM_MAX_SIZE) {
-            // Just warn for now
-            // TODO: Split into multiple serialized datagrams
-            LOG.warning("Content longer than "+RadioDatagramBuilder.DATAGRAM_MAX_SIZE+". May have issues.");
-        }
 
         RadioPeer toRPeer = (RadioPeer)toPeer;
-        Signal signal = toRPeer.mostAvailableSignal();
-        if(signal==null) {
+        Radio radio = RadioSelector.determineBestRadio(toRPeer);
+        if(radio==null) {
             LOG.warning("Unhandled issue #1 here.");
             return false;
         }
-        RadioSession session = radio.getSession(signal, true);
+        RadioSession session = radio.establishSession();
         if(session==null) {
             LOG.warning("Unhandled issue #2 here.");
             return false;
         }
-        RadioDatagramBuilder builder = new RadioDatagramBuilder(session);
-        RadioDatagram datagram = builder.makeRadioDatagram(request.content.getBytes());
+        RadioDatagram datagram = radio.toRadioDatagram(request);
         Properties options = new Properties();
         if(radio.sendDatagram(datagram, session)) {
             LOG.info("Radio Message sent.");
@@ -122,7 +114,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     }
 
     /**
-     * Incoming
+     * Incoming reply from a previous request to service if on local bus
      * @param envelope
      * @return
      */
@@ -146,7 +138,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      */
     @Override
     public void messageAvailable(RadioSession session, Integer port) {
-        RadioDatagram d = radio.receiveDatagram(session, port);
+        RadioDatagram d = session.getRadio().receiveDatagram(session, port);
         LOG.info("Received Radio Message:\n\tFrom: " + d.from.getSDRAddress());
         Envelope e = Envelope.eventFactory(EventMessage.Type.TEXT);
         DID did = new DID();
@@ -176,7 +168,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
     @Override
     public void disconnected(RadioSession session) {
         LOG.info("Radio Session reporting disconnection.");
-        if(radio.disconnected()){
+        if(session.getRadio().disconnected()){
             updateStatus(NETWORK_STOPPED);
         }
         routerStatusChanged();
@@ -218,62 +210,6 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             }
         }
         LOG.info(statusText);
-    }
-
-    /**
-     * Sets up a list of {@link RadioSession}, using the list of active Radio Signals stored on disk or creating a new Radio
-     * Signals file if no file exists.
-     */
-    private void initializeSessions() throws Exception {
-        LOG.info("Initializing Radio Sessions....");
-        updateStatus(SensorStatus.INITIALIZING);
-        taskRunner = new TaskRunner(this, properties);
-        if(signalsFile==null || signals==null) {
-            loadSignals();
-        }
-        RadioSession rs;
-        for(Signal s : signals) {
-            rs = radio.establishSession(s);
-            rs.addSessionListener(this);
-            taskRunner.addTask(new EstablishSession(rs, this, taskRunner, properties));
-        }
-        taskRunner.start();
-    }
-
-    private boolean loadSignals() {
-        signals = new ArrayList<>();
-        if(signalsFile==null) {
-            signalsFile = new File(getDirectory(), SIGNALS_FILE_NAME);
-        }
-        if(!signalsFile.exists()) {
-            try {
-                if(!signalsFile.createNewFile()) {
-                    return false;
-                }
-            } catch (IOException e) {
-                LOG.warning(e.getLocalizedMessage());
-                return false;
-            }
-        }
-        if(signalsFile.length() > 0) {
-            String json = FileUtil.readTextFile(signalsFile.getAbsolutePath(), 100000, true);
-            Map<String, Object> mS = (Map<String, Object>) JSONParser.parse(json);
-            List<Map<String,Object>> mL = (List<Map<String,Object>>)mS.get("signals");
-            SignalBase s;
-            for(Map<String,Object> m : mL) {
-                String t = (String)m.get("type");
-                try {
-                    s = (SignalBase)Class.forName(t).getConstructor().newInstance();
-                } catch (Exception e) {
-                    LOG.warning(e.getLocalizedMessage());
-                    return false;
-                }
-                s.fromMap(m);
-                signals.add(s);
-                LOG.info("RadioSensor Signal: " + s.toString());
-            }
-        }
-        return true;
     }
 
     public RadioPeer getLocalNode() {
@@ -321,56 +257,60 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             LOG.warning(e.getLocalizedMessage());
         }
 
-        String radioDef = properties.getProperty(Radio.class.getName());
-        if(radioDef!=null) {
-            try {
-                radio = (Radio)Class.forName(radioDef).getConstructor().newInstance();
-            } catch (Exception e) {
-                LOG.warning("Unable to instantiate Radio of type: "+radioDef+"\n\tException: "+e.getLocalizedMessage());
-                return false;
+        radios = TechnologyDetection.radiosAvailable(sensorManager.getPeerReport());
+        Collection<Radio> rl = radios.values();
+        for(Radio r : rl) {
+            if(!r.start(p)) {
+                LOG.warning("Unable to start radio: "+r.getClass().getName());
+            } else {
+                radios.put(r.getClass().getName(), r);
             }
         }
-
-        if(!loadLocalNode()) {
-            return false;
-        }
-
-        if(radio.start(properties)) {
-            updateStatus(SensorStatus.NETWORK_CONNECTING);
-            try {
-                initializeSessions();
-            } catch (Exception e) {
-                LOG.warning(e.getLocalizedMessage());
-            }
-            return true;
-        } else {
-            updateStatus(SensorStatus.NETWORK_ERROR);
-            return false;
-        }
+        return radios.size() > 0;
     }
 
     @Override
     public boolean pause() {
-        return radio.pause();
+        return false;
     }
 
     @Override
     public boolean unpause() {
-        return radio.unpause();
+        return false;
     }
 
     @Override
     public boolean restart() {
-        return radio.restart();
+        return false;
     }
 
     @Override
     public boolean shutdown() {
-        return radio.shutdown();
+        if(radios!=null && radios.size() > 0) {
+            Collection<Radio> rl = radios.values();
+            for (Radio r : rl) {
+                if (!r.shutdown()) {
+                    LOG.warning("Unable to shutdown radio: " + r.getClass().getName());
+                } else {
+                    radios.put(r.getClass().getName(), r);
+                }
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean gracefulShutdown() {
-        return radio.gracefulShutdown();
+        if(radios!=null && radios.size() > 0) {
+            Collection<Radio> rl = radios.values();
+            for (Radio r : rl) {
+                if (!r.gracefulShutdown()) {
+                    LOG.warning("Unable to gracefully shutdown radio: " + r.getClass().getName());
+                } else {
+                    radios.put(r.getClass().getName(), r);
+                }
+            }
+        }
+        return true;
     }
 }
