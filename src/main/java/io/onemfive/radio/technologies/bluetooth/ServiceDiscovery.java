@@ -108,7 +108,8 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
                     BluetoothPeer peer;
                     if(peers.get(currentDevice.getBluetoothAddress())==null) {
                         peer = new BluetoothPeer();
-                        peer.setAddress(url);
+                        peer.setAddress(currentDevice.getBluetoothAddress());
+                        peer.setUrl(url);
                         peer.setLocal(false);
                         peers.put(currentDevice.getBluetoothAddress(), peer);
                     }

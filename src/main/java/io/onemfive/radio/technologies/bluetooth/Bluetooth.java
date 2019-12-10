@@ -3,13 +3,12 @@ package io.onemfive.radio.technologies.bluetooth;
 import io.onemfive.data.NetworkPeer;
 import io.onemfive.radio.BaseRadio;
 import io.onemfive.radio.RadioDatagram;
+import io.onemfive.radio.RadioPeer;
 import io.onemfive.radio.RadioSession;
 import io.onemfive.radio.tasks.TaskRunner;
 import io.onemfive.sensors.SensorRequest;
 
 import javax.bluetooth.*;
-import javax.bluetooth.UUID;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -31,28 +30,24 @@ public class Bluetooth extends BaseRadio {
     private ServiceDiscovery serviceDiscovery;
 
     @Override
-    public RadioDatagram toRadioDatagram(SensorRequest request) {
-        return null;
-    }
-
-    @Override
-    public Boolean sendDatagram(RadioDatagram datagram, RadioSession session) {
-        return null;
-    }
-
-    @Override
-    public RadioDatagram receiveDatagram(RadioSession session, Integer port) {
-        return null;
-    }
-
-    @Override
-    public RadioSession establishSession() {
-        return null;
+    public RadioSession establishSession(RadioPeer peer, boolean autoConnect) {
+        BluetoothSession session = new BluetoothSession(this);
+        if(autoConnect) {
+            session.connect(peer);
+        }
+        return session;
     }
 
     @Override
     public boolean start(Properties properties) {
         this.properties = properties;
+
+//        try {
+//            LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
+//        } catch (BluetoothStateException e) {
+//            LOG.warning(e.getLocalizedMessage());
+//            return false;
+//        }
 
         if(taskRunner==null) {
             taskRunner = new TaskRunner(sensor, properties);

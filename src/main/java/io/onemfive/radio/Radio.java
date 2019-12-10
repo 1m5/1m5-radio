@@ -1,7 +1,6 @@
 package io.onemfive.radio;
 
 import io.onemfive.core.LifeCycle;
-import io.onemfive.sensors.SensorRequest;
 import io.onemfive.sensors.peers.PeerReport;
 
 /**
@@ -9,10 +8,7 @@ import io.onemfive.sensors.peers.PeerReport;
  */
 public interface Radio extends LifeCycle {
     void setPeerReport(PeerReport peerReport);
-    RadioDatagram toRadioDatagram(SensorRequest request);
-    Boolean sendDatagram(RadioDatagram datagram, RadioSession session);
-    RadioDatagram receiveDatagram(RadioSession session, Integer port);
-    RadioSession establishSession();
+    RadioSession establishSession(RadioPeer peer, boolean autoConnect);
     RadioSession getSession(Integer sessionId);
     Boolean closeSession(Integer sessionId);
     Boolean disconnected();
