@@ -23,6 +23,8 @@ public class Bluetooth extends BaseRadio {
 
     private Properties properties;
 
+    private BluetoothPeer localPeer;
+
     private Map<String, RemoteDevice> devices = new HashMap<>();
     private Map<String, List<String>> deviceServices = new HashMap<>();
     private Map<String, BluetoothPeer> peers = new HashMap<>();
@@ -63,7 +65,10 @@ public class Bluetooth extends BaseRadio {
         serviceDiscovery.setLongRunning(true);
         taskRunner.addTask(serviceDiscovery);
 
-        peerDiscovery = new PeerDiscovery(this, peers, sensor, taskRunner, properties, 60 * 1000L);
+        localPeer = new BluetoothPeer();
+        localPeer.setAddress("1234");
+
+        peerDiscovery = new PeerDiscovery( localPeer,this, peers, sensor, taskRunner, properties, 60 * 1000L);
         peerDiscovery.setLongRunning(true);
         taskRunner.addTask(peerDiscovery);
 

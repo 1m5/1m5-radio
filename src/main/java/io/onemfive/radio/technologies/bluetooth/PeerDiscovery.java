@@ -16,11 +16,13 @@ public class PeerDiscovery extends RadioTask {
 
     private static final Logger LOG = Logger.getLogger(PeerDiscovery.class.getName());
 
+    private BluetoothPeer localPeer;
     private Bluetooth radio;
     private Map<String, BluetoothPeer> peers;
 
-    public PeerDiscovery(Bluetooth radio, Map<String, BluetoothPeer> peers, RadioSensor sensor, TaskRunner taskRunner, Properties properties, long periodicity) {
+    public PeerDiscovery(BluetoothPeer localPeer, Bluetooth radio, Map<String, BluetoothPeer> peers, RadioSensor sensor, TaskRunner taskRunner, Properties properties, long periodicity) {
         super(sensor, taskRunner, properties, periodicity);
+        this.localPeer = localPeer;
         this.radio = radio;
         this.peers = peers;
         startRunning = false;
@@ -35,9 +37,7 @@ public class PeerDiscovery extends RadioTask {
                 for (BluetoothPeer peer : peersList) {
                     RadioSession session = radio.establishSession(peer, true);
                     RadioDatagram datagram = new RadioDatagram();
-                    BluetoothPeer from = new BluetoothPeer();
-                    from.setAddress("1234");
-                    datagram.from = from;
+                    datagram.from = localPeer;
                     datagram.to = peer;
                     datagram.content = new Text(("Hola Gaia!-"+System.currentTimeMillis()+"").getBytes());
                     session.sendDatagram(datagram);
