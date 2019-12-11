@@ -39,7 +39,7 @@ public class PeerDiscovery extends RadioTask {
                     from.setAddress("1234");
                     datagram.from = from;
                     datagram.to = peer;
-                    datagram.content = new Text("Hola Gaia!".getBytes());
+                    datagram.content = new Text(("Hola Gaia!-"+System.currentTimeMillis()+"").getBytes());
                     session.sendDatagram(datagram);
                 }
             }
