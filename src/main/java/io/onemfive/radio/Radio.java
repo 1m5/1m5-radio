@@ -8,7 +8,7 @@ import io.onemfive.sensors.peers.PeerReport;
  */
 public interface Radio extends LifeCycle {
     void setPeerReport(PeerReport peerReport);
-    RadioSession establishSession(RadioPeer peer, boolean autoConnect);
+    RadioSession establishSession(RadioPeer peer, Boolean autoConnect);
     RadioSession getSession(Integer sessionId);
     Boolean closeSession(Integer sessionId);
     Boolean disconnected();

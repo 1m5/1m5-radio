@@ -42,7 +42,11 @@ public class DeviceDiscovery extends RadioTask implements DiscoveryListener {
                 }
             }
         } catch (BluetoothStateException e) {
-            LOG.warning(e.getLocalizedMessage());
+            if("Bluetooth Device is not available".equals(e.getLocalizedMessage())) {
+                LOG.warning("PLease turn on the bluetooth radio.");
+            } else {
+                LOG.warning(e.getLocalizedMessage());
+            }
             return false;
         } catch (InterruptedException e) {
             LOG.warning(e.getLocalizedMessage());

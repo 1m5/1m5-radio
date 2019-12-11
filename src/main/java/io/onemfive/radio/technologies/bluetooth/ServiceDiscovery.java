@@ -46,11 +46,11 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
 //            objPush = new UUID(args[0], false);
 //        }
 //        UUID obexFileXfer = ServiceClasses.getUUID(ServiceClasses.OBEX_FILE_TRANSFER);
-//        UUID oneMFiveObjPush = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_OBJECT_PUSH);
-//        UUID oneMFiveFileXfer = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_FILE_TRANSFER);
+//        UUID oneMFiveEnvPush = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_ENVELOPE_PUSH);
+//        UUID oneMFiveBinXfer = ServiceClasses.getUUID(ServiceClasses.ONEMFIVE_BINARY_TRANSFER);
 
         UUID[] searchUuidSet = new UUID[] { obexObjPush };
-//        UUID[] searchUuidSet = new UUID[] { obexObjPush, obexFileXfer, oneMFiveObjPush, oneMFiveFileXfer };
+//        UUID[] searchUuidSet = new UUID[] { obexObjPush, obexFileXfer, oneMFiveEnvPush, oneMFiveBinXfer };
 
         int[] attrIDs =  new int[] {
                 0x0100 // Service name
@@ -104,7 +104,8 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
             DataElement serviceName = serviceRecords[i].getAttributeValue(0x0100);
             if (serviceName != null) {
                 LOG.info("service " + serviceName.getValue() + " found " + url);
-                if("1M5".equals(serviceName.getValue())) {
+                // TODO: Ensure 1M5 has service name then perform check
+//                if("1M5".equals(serviceName.getValue())) {
                     BluetoothPeer peer;
                     if(peers.get(currentDevice.getBluetoothAddress())==null) {
                         peer = new BluetoothPeer();
@@ -113,7 +114,7 @@ public class ServiceDiscovery extends RadioTask implements DiscoveryListener {
                         peer.setLocal(false);
                         peers.put(currentDevice.getBluetoothAddress(), peer);
                     }
-                }
+//                }
             } else {
                 LOG.info("service found " + url);
             }

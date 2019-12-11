@@ -1,6 +1,7 @@
 package io.onemfive.radio.technologies.bluetooth;
 
 import io.onemfive.data.NetworkPeer;
+import io.onemfive.data.content.Text;
 import io.onemfive.radio.BaseRadio;
 import io.onemfive.radio.RadioDatagram;
 import io.onemfive.radio.RadioPeer;
@@ -28,9 +29,10 @@ public class Bluetooth extends BaseRadio {
 
     private DeviceDiscovery deviceDiscovery;
     private ServiceDiscovery serviceDiscovery;
+    private PeerDiscovery peerDiscovery;
 
     @Override
-    public RadioSession establishSession(RadioPeer peer, boolean autoConnect) {
+    public RadioSession establishSession(RadioPeer peer, Boolean autoConnect) {
         BluetoothSession session = new BluetoothSession(this);
         if(autoConnect) {
             session.connect(peer);
@@ -60,6 +62,10 @@ public class Bluetooth extends BaseRadio {
         serviceDiscovery = new ServiceDiscovery(devices, deviceServices, peers, sensor, taskRunner, properties, 30 * 1000L);
         serviceDiscovery.setLongRunning(true);
         taskRunner.addTask(serviceDiscovery);
+
+        peerDiscovery = new PeerDiscovery(this, peers, sensor, taskRunner, properties, 60 * 1000L);
+        peerDiscovery.setLongRunning(true);
+        taskRunner.addTask(peerDiscovery);
 
         if(!taskRunner.isAlive()) {
             taskRunner.start();

@@ -96,14 +96,14 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
             LOG.warning("Unhandled issue #1 here.");
             return false;
         }
-        RadioSession session = radio.establishSession();
+        RadioSession session = radio.establishSession(toRPeer, true);
         if(session==null) {
             LOG.warning("Unhandled issue #2 here.");
             return false;
         }
-        RadioDatagram datagram = radio.toRadioDatagram(request);
-        Properties options = new Properties();
-        if(radio.sendDatagram(datagram, session)) {
+        RadioDatagram datagram = session.toRadioDatagram(request);
+//        Properties options = new Properties();
+        if(session.sendDatagram(datagram)) {
             LOG.info("Radio Message sent.");
             return true;
         } else {
@@ -138,7 +138,7 @@ public class RadioSensor extends BaseSensor implements RadioSessionListener {
      */
     @Override
     public void messageAvailable(RadioSession session, Integer port) {
-        RadioDatagram d = session.getRadio().receiveDatagram(session, port);
+        RadioDatagram d = session.receiveDatagram(port);
         LOG.info("Received Radio Message:\n\tFrom: " + d.from.getSDRAddress());
         Envelope e = Envelope.eventFactory(EventMessage.Type.TEXT);
         DID did = new DID();
